@@ -4,6 +4,14 @@
 
 ---
 
+## 👨‍💻 Integrantes
+
+- Pedro Abrantes Andrade | RM558186
+- Ricardo Tavares de Oliveira Filho | RM556092
+- Victor Alves Carmona | RM555726
+
+---
+
 ## 🔧 Tecnologias Utilizadas
 
 - ESP32
