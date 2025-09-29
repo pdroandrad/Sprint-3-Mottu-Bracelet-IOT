@@ -3,8 +3,8 @@ import csv
 import time
 
 # Configuração do canal ThingSpeak
-CHANNEL_ID = "3094585"  # substitua pelo seu Channel ID
-READ_API_KEY = "7P7NWUV8UR7VLDCB"  # substitua pela Read API Key
+CHANNEL_ID = "3094585" 
+READ_API_KEY = "7P7NWUV8UR7VLDCB"
 URL = f"https://api.thingspeak.com/channels/{CHANNEL_ID}/feeds.json"
 
 def fetch_data():
