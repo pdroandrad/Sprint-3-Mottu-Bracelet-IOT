@@ -1,25 +1,27 @@
 # MottuBracelet 🏍️🔊📡
 
-**Solução IoT desenvolvida pela equipe Amplexus Technology para auxiliar na localização de motos nos pátios da empresa Mottu, utilizando tecnologias como MQTT, HTTP e dashboards integrados.**
+**Solução IoT desenvolvida pela equipe Amplexus Technology para auxiliar na localização e monitoramento de motos nos pátios da empresa Mottu, utilizando tecnologias como MQTT, HTTP, dashboards integrados e persistência de dados.**
 
 ---
 
 ## 🔧 Tecnologias Utilizadas
 
 - ESP32
-- Arduino IDE
+- Arduino IDE / VS Code + PlatformIO
 - [Wokwi](https://wokwi.com/) (simulador de circuitos)
 - [HiveMQ](https://www.hivemq.com/) (Broker MQTT gratuito)
 - [ThingSpeak](https://thingspeak.com/) (dashboard para IoT)
+- Python 3 + Requests (para coleta de dados e persistência em CSV)
 
 ---
 
 ## 🧠 Visão Geral do Projeto
 
-O MottuBracelet simula um dispositivo que é acoplado a motos estacionadas em pátios da Mottu. Ele pode ser:
+O **MottuBracelet** simula um dispositivo que é acoplado a motos estacionadas em pátios da Mottu. Ele pode ser:
 
-- Acionado remotamente por MQTT (para localização com buzzer e LED);
-- Monitorado em uma dashboard via HTTP (para visualização de status, pátio e dados da moto).
+- **Acionado remotamente via MQTT** (para localização com buzzer e LED);
+- **Monitorado em uma dashboard via HTTP/ThingSpeak** (telemetria com GPS simulado e nível de bateria);
+- **Registrado localmente em CSV** (persistência de dados para análise histórica).
 
 ---
 
@@ -27,15 +29,18 @@ O MottuBracelet simula um dispositivo que é acoplado a motos estacionadas em p�
 
 ```text
 ├── mqtt-localizacao/
-│ ├── sketch.ino       # Código para acionar LED e buzzer via MQTT
-│ ├── diagram.json     # Diagrama do circuito no Wokwi
-│ ├── libraries.txt    # Bibliotecas instaladas
+│   ├── sketch.ino       # Código para acionar LED e buzzer via MQTT
+│   ├── diagram.json     # Diagrama do circuito no Wokwi
+│   ├── libraries.txt    # Bibliotecas instaladas
 │
 ├── http-dashboard/
-│ ├── sketch.ino       # Código para envio de dados ao ThingSpeak
-│ ├── diagram.json     # Diagrama correspondente
+│   ├── sketch.ino       # Código para envio de dados de telemetria ao ThingSpeak
+│   ├── diagram.json     # Diagrama correspondente
 │
-└── README.md          # Instruções e informações do projeto
+├── data-logger/
+│   └── logger.py        # Script Python para coletar dados do ThingSpeak e salvar em CSV
+│
+└── README.md            # Instruções e informações do projeto
 ```
 
 ---
@@ -59,18 +64,21 @@ O MottuBracelet simula um dispositivo que é acoplado a motos estacionadas em p�
 
 ---
 
-## 🌐 Projeto 2 – Envio de Dados ao ThingSpeak
+## 🌐 Projeto 2 – Envio de Telemetria ao ThingSpeak
 
-**Descrição:** Ao iniciar o sistema, ele envia os dados de cadastro do bracelete (ID, pátio, moto e status) para um canal do ThingSpeak.
+**Descrição:** A cada 20 segundos, o dispositivo envia ao canal do ThingSpeak informações simuladas de telemetria.
 
 ### ✅ Teste a simulação:
-🔗 [Simulação no Wokwi - HTTP/ThingSpeak](https://wokwi.com/projects/431512695946249217)
+🔗 [Simulação no Wokwi - HTTP/ThingSpeak](https://wokwi.com/projects/443436161135181825)
 
 ### 🧾 Campos no ThingSpeak:
 - **Field 1** – ID do Dispositivo (bracelete)
 - **Field 2** – ID da Moto
 - **Field 3** – ID do Pátio
 - **Field 4** – Status Dispositivo (código da avaria)
+- **Field 5** – Latitude
+- **Field 6** – Longitude
+- **Field 7** – Bateria (%)
 - 
 ### 🛠️ Configure seu canal:
 - Crie um canal no [ThingSpeak](https://thingspeak.mathworks.com/).
@@ -83,8 +91,37 @@ const char* server = "api.thingspeak.com";
 
 ---
 
+## 🗂 Projeto 3 – Persistência em CSV
+
+**Descrição:** O script logger.py coleta periodicamente os dados do ThingSpeak e salva em um arquivo CSV chamado telemetria.csv.
+
+### ✅ Como executar:
+```cpp
+cd data-logger
+pip install requests
+python logger.py
+```
+
+### Saída: Um arquivo telemetria.csv contendo os registros históricos de latitude, longitude, nível da bateria e timestamp.
+
+## 📌 Casos de Uso Demonstrados
+
+1. **Moto desaparecida no pátio**  
+   - Supervisor publica `localizar` no tópico MQTT.  
+   - Bracelete responde com buzzer + LED piscando.  
+
+2. **Moto em pátio incorreto**  
+   - GPS simulado envia coordenadas divergentes.  
+   - Dashboard do ThingSpeak mostra discrepância.  
+
+3. **Bateria baixa**  
+   - Bracelete envia percentual de bateria ao ThingSpeak.  
+   - Persistência no CSV permite análise posterior.
+
 ## Resultados obtidos
 
-- Simulação validada com sucesso.
-- Comunicação funcional entre dispositivos MQTT e dashboard HTTP.
+- Simulação validada com sucesso no Wokwi.
+- Comunicação funcional entre dispositivos via MQTT e HTTP.
+- Dashboard do ThingSpeak atualizado em tempo real.
+- Persistência de dados local em CSV implementada.
 - Solução escalável e adaptável a diferentes plantas de pátios da Mottu.
